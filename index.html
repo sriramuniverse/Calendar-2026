@@ -3,234 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <center><img src="Suvarna Lakshmi Frame.png" width="112px"><img src="Suvarna Lakshmi Enterprises-Company.png" width="500px"></center>
-    <title>2026 Live Interactive Calendar</title>
+    
+    <title>2026 Calendar</title>
     <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #e74c3c;
-            --gazetted-bg: #ffebee;
-            --gazetted-text: #c62828;
-            --restricted-bg: #e8f5e9;
-            --restricted-text: #2e7d32;
-            --bg: #f8f9fa;
-        }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        :root { --bg: #ffffff; --text: #222; --card: #f0f0f0; --accent: #e67e22; --circle: #d35400; }
+        [data-theme="dark"] { --bg: #121212; --text: #e0e0e0; --card: #1e1e1e; --accent: #f39c12; --circle: #e67e22; }
         
-        /* Header Section */
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { margin: 0; color: var(--primary); font-size: 2.5rem; }
-        #live-clock { font-size: 1.2rem; color: #555; margin-top: 10px; font-weight: bold; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; transition: 0.3s; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         
-        /* Controls */
-        .controls { text-align: center; margin: 20px 0; }
-        .filter-btn {
-            padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; margin: 0 5px; font-weight: 600; transition: 0.3s;
-        }
-        .filter-btn.active { box-shadow: 0 0 0 2px #333 inset; }
-        .btn-all { background: #ddd; color: #333; }
-        .btn-gazetted { background: var(--gazetted-bg); color: var(--gazetted-text); }
-        .btn-restricted { background: var(--restricted-bg); color: var(--restricted-text); }
+        /* Circular Clock */
+        .clock-container { width: 180px; height: 180px; border: 5px solid var(--circle); border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 30px; box-shadow: 0 0 15px var(--accent); }
+        #time { font-size: 1.6rem; font-weight: bold; }
+        #date-display { font-size: 0.85rem; letter-spacing: 1px; color: var(--accent); }
 
-        /* Calendar Grid */
-        .year-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto;
-        }
-        .month-card { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .month-name { text-align: center; font-weight: 700; color: var(--primary); margin-bottom: 10px; font-size: 1.2em; text-transform: uppercase; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
-        
-        /* Calendar Table */
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th { font-size: 0.8em; color: #888; padding-bottom: 5px; }
-        td { text-align: center; height: 35px; vertical-align: middle; font-size: 0.9em; border-radius: 4px; position: relative; }
-        
-        .sun { color: var(--accent); font-weight: bold; }
-        
-        /* Holiday Styles */
-        .h-gazetted { background: var(--gazetted-bg); color: var(--gazetted-text); font-weight: bold; cursor: pointer; }
-        .h-restricted { background: var(--restricted-bg); color: var(--restricted-text); font-weight: bold; cursor: pointer; }
-        
-        /* Tooltip */
-        td[data-title]:hover::after {
-            content: attr(data-title); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
-            background: #333; color: #fff; padding: 5px 10px; border-radius: 4px; font-size: 0.75em; white-space: nowrap; z-index: 100; pointer-events: none; margin-bottom: 5px;
-        }
+        /* Calendar Styling */
+        .calendar-card { background: var(--card); width: 360px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 5px; }
+        .day-name { font-weight: bold; color: var(--accent); font-size: 0.8rem; padding-bottom: 10px; }
+        .day { padding: 10px; border-radius: 5px; cursor: pointer; }
+        .day:hover { background: var(--accent); color: white; }
+        .today { border: 2px solid var(--accent); font-weight: bold; }
 
-        /* Holiday Legend */
-        .legend { text-align: center; margin-top: 30px; font-size: 0.9em; color: #666; }
-        .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
-        
-        /* Responsive adjustments */
-        @media (max-width: 600px) { h1 { font-size: 1.8rem; } }
+        /* Buttons & Festival Text */
+        .btn { background: var(--accent); color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .mode-toggle { position: fixed; top: 20px; right: 20px; }
+        .festivals { margin-top: 20px; text-align: center; font-size: 0.9rem; border-top: 1px solid #555; padding-top: 10px; min-height: 50px; color: var(--accent); }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>2026 Calendar</h1>
-    <div id="live-clock">Loading Clock...</div>
-</header>
 
-<div class="controls">
-    <button class="filter-btn btn-all active" onclick="filterHolidays('all')">All Holidays</button>
-    <button class="filter-btn btn-gazetted" onclick="filterHolidays('gazetted')">Gazetted (Red)</button>
-    <button class="filter-btn btn-restricted" onclick="filterHolidays('restricted')">Restricted/Festivals (Green)</button>
-</div>
-
-<div class="year-grid" id="calendar-root">
-    <!-- Calendar will be generated here by JavaScript -->
-</div>
-
-<div class="legend">
-    <span style="margin-right: 15px;"><span class="dot" style="background: #ffcdd2;"></span>Gazetted Holiday (National)</span>
-    <span><span class="dot" style="background: #c8e6c9;"></span>Restricted/Regional Festival</span>
-</div>
-
-<script>
-    // 1. Configuration: Year and Holidays
-    const YEAR = 2026;
-    const holidays = {
-        "1-1": { name: "New Year's Day", type: "restricted" },
-        "1-13": { name: "Lohri", type: "restricted" },
-        "1-14": { name: "Makar Sankranti / Pongal", type: "restricted" },
-        "1-26": { name: "Republic Day", type: "gazetted" },
-        "2-1": { name: "Guru Ravidas Jayanti", type: "restricted" },
-        "2-15": { name: "Maha Shivaratri", type: "gazetted" },
-        "2-19": { name: "Shivaji Jayanti", type: "restricted" },
-        "3-4": { name: "Holi", type: "gazetted" },
-        "3-19": { name: "Ugadi / Gudi Padwa", type: "restricted" },
-        "3-21": { name: "Eid-ul-Fitr (Tentative)", type: "gazetted" },
-        "3-26": { name: "Ram Navami", type: "gazetted" },
-        "3-31": { name: "Mahavir Jayanti", type: "gazetted" },
-        "4-3": { name: "Good Friday", type: "gazetted" },
-        "4-14": { name: "Ambedkar Jayanti / Vaisakhi", type: "gazetted" },
-        "5-1": { name: "Buddha Purnima / Labour Day", type: "gazetted" },
-        "5-27": { name: "Eid-ul-Adha (Bakrid)", type: "gazetted" },
-        "6-26": { name: "Muharram (Tentative)", type: "gazetted" },
-        "7-16": { name: "Rath Yatra", type: "restricted" },
-        "8-15": { name: "Independence Day", type: "gazetted" },
-        "8-26": { name: "Onam", type: "restricted" },
-        "8-28": { name: "Raksha Bandhan", type: "restricted" },
-        "9-4": { name: "Janmashtami", type: "gazetted" },
-        "9-14": { name: "Ganesh Chaturthi", type: "restricted" },
-        "10-2": { name: "Gandhi Jayanti", type: "gazetted" },
-        "10-20": { name: "Dussehra", type: "gazetted" },
-        "10-29": { name: "Karva Chauth", type: "restricted" },
-        "11-8": { name: "Diwali", type: "gazetted" },
-        "11-9": { name: "Govardhan Puja", type: "restricted" },
-        "11-11": { name: "Bhai Dooj", type: "restricted" },
-        "11-15": { name: "Chhath Puja", type: "restricted" },
-        "11-24": { name: "Guru Nanak Jayanti", type: "gazetted" },
-        "12-25": { name: "Christmas", type: "gazetted" }
-    };
-
-    // 2. Live Clock Function
-    function updateClock() {
-        const now = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-        document.getElementById('live-clock').innerText = "Today is: " + now.toLocaleDateString('en-US', options);
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    // 3. Calendar Generator
-    function generateCalendar() {
-        const container = document.getElementById('calendar-root');
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         
-        let htmlContent = "";
+    <table border="0" width="100%">
+        <tr>
+        <td>
+        <center>
+        <img src="Suvarna Lakshmi Frame.png" width="150px">
+        <font color="orange"><h1>SUVARNA LAKSHMI ENTERPRISES</h1></font><br><br><br>
+        </center>
+       </td>
+       </tr>
+    </table>
 
-        for (let month = 0; month < 12; month++) {
-            // First day of the month
-            let firstDay = new Date(YEAR, month, 1).getDay();
-            // Days in month
-            let daysInMonth = new Date(YEAR, month + 1, 0).getDate();
+   
+    <button class="btn mode-toggle" onclick="toggleTheme()">Toggle Dark Mode</button>
 
-            htmlContent += `
-            <div class="month-card">
-                <div class="month-name">${monthNames[month]}</div>
-                <table>
-                    <tr>
-                        <th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th>
-                    </tr>
-                    <tr>`;
+    <div class="clock-container">
+        <div id="time">00:00:00</div>
+        <div id="date-display">15 MAR 2026</div>
+    </div>
 
-            // Empty cells for days before start of month
-            for (let i = 0; i < firstDay; i++) {
-                htmlContent += `<td></td>`;
-            }
+    <div class="calendar-card">
+        <div class="header">
+            <button class="btn" onclick="changeMonth(-1)">PREV</button>
+            <h3 id="monthYear">MARCH 2026</h3>
+            <button class="btn" onclick="changeMonth(1)">NEXT</button>
+        </div>
+        <div class="grid" id="calendarGrid"></div>
+        <div class="festivals" id="festivalBox"></div>
+    </div>
+    </table>
 
-            // Days generation
-            for (let day = 1; day <= daysInMonth; day++) {
-                let dateKey = `${month + 1}-${day}`;
-                let holiday = holidays[dateKey];
-                let className = "";
-                let tooltip = "";
-                let isSunday = new Date(YEAR, month, day).getDay() === 0;
 
-                if (isSunday) className += "sun ";
+    <script>
+        let currentYear = 2026;
+        let currentMonth = 2; // March
 
-                if (holiday) {
-                    if (holiday.type === "gazetted") className += "h-gazetted holiday ";
-                    if (holiday.type === "restricted") className += "h-restricted holiday ";
-                    tooltip = `data-title="${holiday.name}"`;
-                    // Add extra data attribute for filtering
-                    tooltip += ` data-type="${holiday.type}"`;
-                }
+        // 2026 Indian Festival Data (Lunar/Solar)
+        const festivalData = {
+            "0-14": "Makar Sankranti / Pongal", "0-23": "Vasant Panchami", "0-26": "Republic Day",
+            "1-15": "Maha Shivaratri", "2-4": "Holi", "2-19": "Gudi Padwa / Ugadi", "2-21": "Eid-ul-Fitr (Tentative)", "2-26": "Ram Navami", "2-31": "Mahavir Jayanti",
+            "3-3": "Good Friday", "4-1": "Buddha Purnima", "4-27": "Bakrid (Tentative)",
+            "5-26": "Muharram (Tentative)", "7-15": "Independence Day", "7-26": "Onam / Raksha Bandhan",
+            "8-4": "Janmashtami", "8-14": "Ganesh Chaturthi",
+            "9-2": "Gandhi Jayanti", "9-11": "Navratri Begins", "9-20": "Dussehra",
+            "10-8": "Diwali / Deepavali", "10-24": "Guru Nanak Jayanti",
+            "11-25": "Christmas"
+        };
 
-                htmlContent += `<td class="${className}" ${tooltip}>${day}</td>`;
-
-                // Break row at Saturday (6)
-                if ((day + firstDay) % 7 === 0) {
-                    htmlContent += `</tr><tr>`;
-                }
-            }
-
-            htmlContent += `</tr></table></div>`;
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('time').innerText = now.toLocaleTimeString('en-IN', { hour12: false });
+            document.getElementById('date-display').innerText = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
         }
-        container.innerHTML = htmlContent;
-    }
 
-    // 4. Filter Function
-    function filterHolidays(type) {
-        // Update buttons
-        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`.btn-${type}`).classList.add('active');
-
-        // Logic to toggle visual styles
-        const allHolidays = document.querySelectorAll('.holiday');
-        
-        allHolidays.forEach(cell => {
-            const cellType = cell.getAttribute('data-type');
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const label = document.getElementById('monthYear');
+            const festBox = document.getElementById('festivalBox');
             
-            // Reset styles first
-            cell.style.backgroundColor = "";
-            cell.style.color = "";
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' }).toUpperCase();
 
-            if (type === 'all') {
-                // Restore original class colors (handled by CSS, just remove inline overrides)
-                cell.style.opacity = "1";
-            } else if (type === 'gazetted') {
-                if (cellType !== 'gazetted') {
-                    cell.style.backgroundColor = "#fff"; // Hide others
-                    cell.style.color = "#ddd";
-                } else {
-                    cell.style.opacity = "1";
-                }
-            } else if (type === 'restricted') {
-                if (cellType !== 'restricted') {
-                    cell.style.backgroundColor = "#fff";
-                    cell.style.color = "#ddd";
-                } else {
-                    cell.style.opacity = "1";
+            label.innerText = `${monthName} ${currentYear}`;
+            grid.innerHTML = '';
+            festBox.innerText = "";
+
+            ['SUN','MON','TUE','WED','THU','FRI','SAT'].forEach(d => grid.innerHTML += `<div class="day-name">${d}</div>`);
+
+            for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div></div>`;
+            for (let d = 1; d <= daysInMonth; d++) {
+                const isToday = (new Date().getDate() === d && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear) ? 'today' : '';
+                grid.innerHTML += `<div class="day ${isToday}">${d}</div>`;
+                
+                // Show festival if year is 2026
+                if (currentYear === 2026 && festivalData[`${currentMonth}-${d}`]) {
+                    festBox.innerText += `${d} ${monthName.slice(0,3)}: ${festivalData[`${currentMonth}-${d}`]}\n`;
                 }
             }
-        });
-    }
+        }
 
-    // Initialize
-    generateCalendar();
-</script>
+        function changeMonth(dir) {
+            currentMonth += dir;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            
+            // Limit range 2026-2100
+            currentYear = Math.min(2100, Math.max(2026, currentYear));
+            renderCalendar();
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        }
+
+        setInterval(updateClock, 1000);
+        renderCalendar();
+        updateClock();
+    </script>
 
 </body>
 </html>
